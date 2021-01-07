@@ -1,26 +1,5 @@
 var matchInfo = {};
-var eventsList = [];
 var betsList = {};
-
-// chrome.storage.sync.set({
-//     settings: {
-//         betting: {
-//             enabled: false
-//         }
-//     }
-// });
-
-// chrome.storage.onChanged.addListener(function(changes, namespace) {
-//     for (var key in changes) {
-//       var storageChange = changes[key];
-//       console.log('Storage key "%s" in namespace "%s" changed. ' +
-//                   'Old value was "%s", new value is "%s".',
-//                   key,
-//                   namespace,
-//                   storageChange.oldValue,
-//                   storageChange.newValue);
-//     }
-// });
 
 document.onreadystatechange = function () {
     if (document.readyState === 'complete') {
@@ -29,7 +8,16 @@ document.onreadystatechange = function () {
                 clearInterval(loading);
 
                 const eventsLoader = new Events();
+                const marketsLoader = new Markets();
+
                 eventsLoader.init();
+                marketsLoader.init();
+
+                document.addEventListener('app.events.new', function(e) { 
+                    var event = e.detail.event
+
+                    console.log(event);
+                })
 
                 match();
                 events();
@@ -94,67 +82,47 @@ var currentStreak = '';
 var currentStreakCount = 0;
 
 function events() {
-    new MutationObserver(function(mutations) {
-        mutations.forEach(mutation => {
-            if(mutation.type === 'childList') {
-                mutation.addedNodes.forEach(item => {
-                    if(item.querySelector('.custom-event-log-item') == null) {
-                        var event = {};
-                        var data = item.querySelectorAll('.event-log-item-part:not(.--separator)');
-    
-                        if(data[0].classList.contains('home')) {
-                            event.name = data[0].innerText;
-                            event.time = data[1].innerText
-                        } else if(data[0].classList.contains('away')) {
-                            event.name = data[1].innerText;
-                            event.time = data[0].innerText
-                        }
+    document.addEventListener('app.events.new', function(e) { 
+        var event = e.detail.event
 
-                        console.log(event);
-                        eventsList.push(event);
-    
-                        var nextBet = '';
-                        if(event.name == 'Аут') {
-                            nextBet = 'Аут'; 
-                            selectBet(nextBet, 'left');
-                        } else {
-                            nextBet = 'Не Аут'; 
-                            selectBet(nextBet, 'right');
-                        }
+        console.log(event);
 
-                        if (currentStreak == nextBet) {
-                            currentStreakCount++;
-                        } else {
-                            currentStreak = nextBet;
-                            currentStreakCount = 1;
-                        }
-                        
-                        console.log(currentStreak, currentStreakCount);
+        var nextBet = '';
+        if(event.name == 'Аут') {
+            nextBet = 'Аут'; 
+            selectBet(nextBet, 'left');
+        } else {
+            nextBet = 'Не Аут'; 
+            selectBet(nextBet, 'right');
+        }
 
-                        if(
-                            (
-                                nextBet == 'Аут' 
-                                // && currentStreakCount < 2
-                            ) || (
-                                nextBet == 'Не Аут' 
-                                // && currentStreakCount < 5
-                            )
-                        ) {
-                            var betting = setInterval(function() {
-                                if (selectorLock == null) {
-                                    makeBet(nextBet);
-                                    bets();
-                                    clearInterval(betting);
-                                }
-                            }, 200);
-                        }
-                    }                    
-                });
-            }
-        });
-    }).observe(document.getElementById('event-log'), { 
-        attributes: true, childList: true, subtree: true 
-    });
+        if (currentStreak == nextBet) {
+            currentStreakCount++;
+        } else {
+            currentStreak = nextBet;
+            currentStreakCount = 1;
+        }
+        
+        console.log(currentStreak, currentStreakCount);
+
+        if(
+            (
+                nextBet == 'Аут' 
+                // && currentStreakCount < 2
+            ) || (
+                nextBet == 'Не Аут' 
+                // && currentStreakCount < 5
+            )
+        ) {
+            var betting = setInterval(function() {
+                if (selectorLock == null) {
+                    makeBet(nextBet);
+                    bets();
+                    clearInterval(betting);
+                }
+            }, 200);
+        }
+    })
 }
 
 function makeBet(nextBet) {
@@ -166,7 +134,7 @@ function makeBet(nextBet) {
                 document.querySelector('.clear-btn').click();
                 document.querySelectorAll('.chips-money .hand-bet-chip')[0].click();
                 // document.querySelectorAll('.chips-money .hand-bet-chip')[0].click();
-                // document.querySelector('.place-btn').click() //place bet
+                document.querySelector('.place-btn').click() //place bet
             } else {
                 console.log('low coefficient')
             }
@@ -196,8 +164,29 @@ function bets() {
     if(payouts - amount > 30) { betDisabled = true };
 }
 
+// chrome.storage.sync.set({
+//     settings: {
+//         betting: {
+//             enabled: false
+//         }
+//     }
+// });
+
+// chrome.storage.onChanged.addListener(function(changes, namespace) {
+//     for (var key in changes) {
+//       var storageChange = changes[key];
+//       console.log('Storage key "%s" in namespace "%s" changed. ' +
+//                   'Old value was "%s", new value is "%s".',
+//                   key,
+//                   namespace,
+//                   storageChange.oldValue,
+//                   storageChange.newValue);
+//     }
+// });
 
 //document.querySelector('.all-matches-btn').click()
 //document.querySelector('.matches-all').querySelector('.table-matches').querySelector('.table-row').click()
 //document.querySelector('.matches-all').querySelector('.table-matches').querySelector('.table-row.--planned').click()
 //location.reload()
+
+//document.querySelector('.mtexp-overlay')

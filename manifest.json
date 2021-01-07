@@ -9,7 +9,8 @@
     ],
     "js": [
       "content.js",
-      "src/Events.js"
+      "src/Events.js",
+      "src/Markets.js"
     ],
     "run_at": "document_end",
     "all_frames": true

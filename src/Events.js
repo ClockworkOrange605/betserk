@@ -27,7 +27,9 @@ class Events {
                         var event = self.mapEvent(eventBlock)
 
                         if(event.name != undefined) {
-                            // Process betting                           
+                            document.dispatchEvent(
+                                new CustomEvent('app.events.new', {detail: {event: event}})
+                            );
                         }
                     });
                 }
