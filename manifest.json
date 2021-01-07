@@ -8,7 +8,8 @@
       "https://production.nbaplus.tk/*"
     ],
     "js": [
-      "content.js"
+      "content.js",
+      "src/Events.js"
     ],
     "run_at": "document_end",
     "all_frames": true

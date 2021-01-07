@@ -28,8 +28,8 @@ document.onreadystatechange = function () {
             if(document.querySelector('.main-screen') != null) {
                 clearInterval(loading);
 
-                // const eventsLoader = new Events();
-                // eventsLoader.init();
+                const eventsLoader = new Events();
+                eventsLoader.init();
 
                 match();
                 events();
@@ -166,7 +166,7 @@ function makeBet(nextBet) {
                 document.querySelector('.clear-btn').click();
                 document.querySelectorAll('.chips-money .hand-bet-chip')[0].click();
                 // document.querySelectorAll('.chips-money .hand-bet-chip')[0].click();
-                document.querySelector('.place-btn').click() //place bet
+                // document.querySelector('.place-btn').click() //place bet
             } else {
                 console.log('low coefficient')
             }
