@@ -1,6 +1,3 @@
-var matchInfo = {};
-var betsList = {};
-
 document.onreadystatechange = function () {
     if (document.readyState === 'complete') {
         const loading = setInterval(function() {
@@ -13,6 +10,8 @@ document.onreadystatechange = function () {
                 eventsLoader.init();
                 marketsLoader.init();
 
+                // marketsLoader.selectMarket('Не Аут')
+
                 document.addEventListener('app.events.new', function(e) { 
                     var event = e.detail.event
 
@@ -20,36 +19,14 @@ document.onreadystatechange = function () {
                 })
 
                 match();
-                events();
+                events(marketsLoader);
                 bets();
-
-                selectBet('Не Аут', 'right');
             }
         }, 100)
     }
 }
 
-var selectorLock = null;
-function selectBet (market, direction) {
-    var prevButton = document.querySelector('.swiper-button-prev');
-    var nextButton = document.querySelector('.swiper-button-next');
-
-    if (selectorLock == null) {
-        selectorLock = true;
-        var selector = setInterval(function() {
-            if(document.querySelector('.markets-hand .market--selected').querySelector('.market-title .bbb').innerText.replace(/(\r\n|\n|\r)/gm," ") != market) {
-                if(direction == 'left') {
-                    prevButton.click();
-                } else if (direction == 'right') {
-                    nextButton.click();    
-                }
-            } else {
-                clearInterval(selector);
-                selectorLock = null;
-            }
-        }, 50);
-    }
-}
+var matchInfo = {};
 
 function match() {
     var infoContainer = document.querySelector('.info-container');
@@ -81,7 +58,9 @@ function match() {
 var currentStreak = '';
 var currentStreakCount = 0;
 
-function events() {
+function events(marketsLoader) {
+    marketsLoader.selectMarket('Не Аут')
+
     document.addEventListener('app.events.new', function(e) { 
         var event = e.detail.event
 
@@ -90,11 +69,11 @@ function events() {
         var nextBet = '';
         if(event.name == 'Аут') {
             nextBet = 'Аут'; 
-            selectBet(nextBet, 'left');
         } else {
             nextBet = 'Не Аут'; 
-            selectBet(nextBet, 'right');
         }
+
+        marketsLoader.selectMarket(nextBet)
 
         if (currentStreak == nextBet) {
             currentStreakCount++;
@@ -115,7 +94,7 @@ function events() {
             )
         ) {
             var betting = setInterval(function() {
-                if (selectorLock == null) {
+                if (!self.lockSlider) {
                     makeBet(nextBet);
                     bets();
                     clearInterval(betting);
