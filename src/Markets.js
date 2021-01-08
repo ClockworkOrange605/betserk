@@ -2,18 +2,20 @@ class Markets {
 
     constructor() {
         this.markets = []
+        this.chips = []
         this.container = document.querySelector('.markets-hand')
 
         this.lockSlider = false
         this.buttonPrev = document.querySelector('.swiper-button-prev')
-        this.buttonNext = document.querySelector('.swiper-button-next')        
+        this.buttonNext = document.querySelector('.swiper-button-next')
+        
+        this.buttonClear = this.container.querySelector('.clear-btn')
+        this.buttonMakeBet = this.container.querySelector('.place-btn')
     }
 
     init() {
         this.parseMarkets()
-
-        // this.selectMarket('Аут')
-        // this.selectMarket('Не Аут')
+        this.parseChips()
     }
 
     selectMarket(market) {
@@ -47,11 +49,42 @@ class Markets {
         }
     }
 
+    clearBetAmount() {
+        this.buttonClear.click()
+    }
+
+    makeBet() {
+        this.buttonMakeBet.click()
+    }
+
+    selectBetAmount(amount) {
+        const chipBlockList = this.container.querySelector('.hand-container')
+            .querySelector('.chip-container')
+            
+        
+        if(this.chips.find(chip => chip.value == amount)) {
+            this.chips.find(chip => chip.value == amount).selector.click()
+        } else {
+            console.error(amount, 'wrong bet amount')            
+        }        
+    }
+
     parseMarkets() {
         this.markets = []
+        
         const marketsBlockList = this.container.querySelectorAll('.market')
+
         marketsBlockList.forEach((marketBlock) => {
             this.mapMarket(marketBlock)
+        })
+    }
+
+    parseChips() {
+        const chipsBlockList = this.container.querySelector('.hand-container').querySelector('.chip-container')
+            .querySelectorAll('.hand-bet-chip')
+
+        chipsBlockList.forEach((chipBlock) => {
+            this.mapChip(chipBlock)
         })
     }
 
@@ -64,5 +97,14 @@ class Markets {
         this.markets.push(market)
 
         return market
+    }
+
+    mapChip(chipBlock) {
+        var chip = {}
+        
+        chip.value = parseInt(chipBlock.innerText)
+        chip.selector = chipBlock
+
+        this.chips.push(chip)
     }
 }

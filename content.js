@@ -10,16 +10,14 @@ document.onreadystatechange = function () {
                 eventsLoader.init();
                 marketsLoader.init();
 
-                // marketsLoader.selectMarket('Не Аут')
-
                 document.addEventListener('app.events.new', function(e) { 
                     var event = e.detail.event
-
-                    console.log(event);
+                    
                 })
 
-                match();
                 events(marketsLoader);
+
+                match();
                 bets();
             }
         }, 100)
@@ -59,8 +57,6 @@ var currentStreak = '';
 var currentStreakCount = 0;
 
 function events(marketsLoader) {
-    marketsLoader.selectMarket('Не Аут')
-
     document.addEventListener('app.events.new', function(e) { 
         var event = e.detail.event
 
@@ -75,51 +71,52 @@ function events(marketsLoader) {
 
         marketsLoader.selectMarket(nextBet)
 
-        if (currentStreak == nextBet) {
-            currentStreakCount++;
-        } else {
-            currentStreak = nextBet;
-            currentStreakCount = 1;
-        }
+        // if (currentStreak == nextBet) {
+        //     currentStreakCount++;
+        // } else {
+        //     currentStreak = nextBet;
+        //     currentStreakCount = 1;
+        // }
         
-        console.log(currentStreak, currentStreakCount);
+        // console.log(currentStreak, currentStreakCount);
 
-        if(
-            (
-                nextBet == 'Аут' 
-                // && currentStreakCount < 2
-            ) || (
-                nextBet == 'Не Аут' 
-                // && currentStreakCount < 5
-            )
-        ) {
+        // if(
+        //     (
+        //         nextBet == 'Аут' 
+        //         // && currentStreakCount < 2
+        //     ) || (
+        //         nextBet == 'Не Аут' 
+        //         // && currentStreakCount < 5
+        //     )
+        // ) {
             var betting = setInterval(function() {
-                if (!self.lockSlider) {
-                    makeBet(nextBet);
+                if (!marketsLoader.lockSlider) {
+                    makeBet(nextBet, marketsLoader);
                     bets();
                     clearInterval(betting);
                 }
             }, 200);
-        }
+        // }
     })
 }
 
-function makeBet(nextBet) {
+function makeBet(nextBet, marketsLoader) {
     if(document.querySelector('.disabled_hand') == null){
-        console.log(document.querySelector('.markets-hand .market--selected').querySelector('.market-title .bbb').innerText.replace(/(\r\n|\n|\r)/gm," "));
-        if(document.querySelector('.markets-hand .market--selected').querySelector('.market-title .bbb').innerText.replace(/(\r\n|\n|\r)/gm," ") == nextBet) {
+        // console.log(document.querySelector('.markets-hand .market--selected').querySelector('.market-title .bbb').innerText.replace(/(\r\n|\n|\r)/gm," "));
+        // if(document.querySelector('.markets-hand .market--selected').querySelector('.market-title .bbb').innerText.replace(/(\r\n|\n|\r)/gm," ") == nextBet) {
             console.log(document.querySelector('.markets-hand .market--selected').querySelector('.market-coeff').innerText);
             if(document.querySelector('.markets-hand .market--selected').querySelector('.market-coeff').innerText > 1.5) {
-                document.querySelector('.clear-btn').click();
-                document.querySelectorAll('.chips-money .hand-bet-chip')[0].click();
-                // document.querySelectorAll('.chips-money .hand-bet-chip')[0].click();
-                document.querySelector('.place-btn').click() //place bet
+
+                marketsLoader.clearBetAmount()
+                marketsLoader.selectBetAmount(10)
+                marketsLoader.makeBet()
+
             } else {
                 console.log('low coefficient')
             }
-        } else {
-            console.log('wrong market')
-        }
+        // } else {
+            // console.log('wrong market')
+        // }
     } else {
         console.log('betting  disabled')
     }
