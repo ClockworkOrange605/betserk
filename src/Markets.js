@@ -53,10 +53,6 @@ class Markets {
         this.buttonClear.click()
     }
 
-    makeBet() {
-        this.buttonMakeBet.click()
-    }
-
     selectBetAmount(amount) {
         const chipBlockList = this.container.querySelector('.hand-container')
             .querySelector('.chip-container')
@@ -67,6 +63,10 @@ class Markets {
         } else {
             console.error(amount, 'wrong bet amount')            
         }        
+    }
+
+    makeBet() {
+        this.buttonMakeBet.click()
     }
 
     parseMarkets() {
@@ -80,6 +80,8 @@ class Markets {
     }
 
     parseChips() {
+        this.chips = []
+
         const chipsBlockList = this.container.querySelector('.hand-container').querySelector('.chip-container')
             .querySelectorAll('.hand-bet-chip')
 

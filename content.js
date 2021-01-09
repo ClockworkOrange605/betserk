@@ -1,3 +1,6 @@
+var initialBalance = 0
+var bettingEnabled = true
+
 document.onreadystatechange = function () {
     if (document.readyState === 'complete') {
         const loading = setInterval(function() {
@@ -10,12 +13,11 @@ document.onreadystatechange = function () {
                 eventsLoader.init();
                 marketsLoader.init();
 
-                document.addEventListener('app.events.new', function(e) { 
-                    var event = e.detail.event
-                    
-                })
-
+                initialBalance = parseFloat(document.querySelector('.balance__state').querySelector('.anim-num').innerText)
                 events(marketsLoader);
+                // document.addEventListener('app.events.new', function(e) { 
+                //     var event = e.detail.event
+                // })                
 
                 match();
                 bets();
@@ -60,6 +62,12 @@ function events(marketsLoader) {
     document.addEventListener('app.events.new', function(e) { 
         var event = e.detail.event
 
+        if(lockPendingBet) {
+            console.log('clear pending bet')
+            clearInterval(betInterval)
+            lockPendingBet = false
+        }
+
         console.log(event);
 
         var nextBet = '';
@@ -92,34 +100,66 @@ function events(marketsLoader) {
             var betting = setInterval(function() {
                 if (!marketsLoader.lockSlider) {
                     makeBet(nextBet, marketsLoader);
-                    bets();
                     clearInterval(betting);
                 }
             }, 200);
         // }
+
+        var currentBalance = parseFloat(document.querySelector('.balance__state').querySelector('.anim-num').innerText)
+        console.log(currentBalance, initialBalance)
+        console.log(currentBalance - initialBalance)
+
+        if(currentBalance - initialBalance < -30) {
+            bettingEnabled = false
+            console.log('turn off betting')
+        }
     })
 }
 
+var lockPendingBet = false
+var betInterval = null
+
 function makeBet(nextBet, marketsLoader) {
-    if(document.querySelector('.disabled_hand') == null){
-        // console.log(document.querySelector('.markets-hand .market--selected').querySelector('.market-title .bbb').innerText.replace(/(\r\n|\n|\r)/gm," "));
-        // if(document.querySelector('.markets-hand .market--selected').querySelector('.market-title .bbb').innerText.replace(/(\r\n|\n|\r)/gm," ") == nextBet) {
-            console.log(document.querySelector('.markets-hand .market--selected').querySelector('.market-coeff').innerText);
+    if(lockPendingBet) {
+        clearInterval(betInterval)
+        lockPendingBet = false
+    }
+
+    lockPendingBet = true
+    betInterval = setInterval(function() {
+        if(document.querySelector('.disabled_hand') == null){
             if(document.querySelector('.markets-hand .market--selected').querySelector('.market-coeff').innerText > 1.5) {
+                console.log(document.querySelector('.markets-hand .market--selected').querySelector('.market-coeff').innerText);
+    
+                clearInterval(betInterval)
+                lockPendingBet = false
 
                 marketsLoader.clearBetAmount()
                 marketsLoader.selectBetAmount(10)
-                marketsLoader.makeBet()
 
+                if(bettingEnabled) {                    
+                    marketsLoader.makeBet()
+                } else {
+                    console.log('loosing streak')
+                    document.querySelector('.all-matches-btn').click()
+
+                    var switchMatch = setInterval(function() {
+                        if(document.querySelector('.matches-all') != null) {
+                            clearInterval(switchMatch)
+
+                            console.log('next match')
+                            document.querySelector('.matches-all').querySelector('.table-matches').querySelector('.table-row.--planned').click()
+                        }                        
+                    }, 1000)
+                }
+    
             } else {
                 console.log('low coefficient')
             }
-        // } else {
-            // console.log('wrong market')
-        // }
-    } else {
-        console.log('betting  disabled')
-    }
+        } else {
+            console.log('betting  disabled')
+        }
+    }, 1000)
 }
 
 function bets() {
@@ -134,10 +174,7 @@ function bets() {
             0 : parseFloat(betItem.querySelector('.table-row-item.--payout').innerText.replace(/^\D+/g, ''));
     });
 
-    // console.log(amount, payouts);
     console.log(payouts - amount);
-
-    if(payouts - amount > 30) { betDisabled = true };
 }
 
 // chrome.storage.sync.set({
